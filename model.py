@@ -142,3 +142,43 @@ class Bullet:
     def move(self, dx):
         """Move the bullet by dx pixels horizontally and dy pixels vertically."""
         self.x += dx
+
+
+class GameState:
+    """Class representing the game state.
+    Attributes:
+        player1 (Player): The first player.
+        player2 (Player): The second player.
+        alien (Alien): The alien in the game.
+        bullets (list): List of bullets in the game.
+
+    Methods:
+        add_bullet(player_id): Add a bullet for the specified player.
+        get_bullets(): Return the list of bullets.
+    """
+
+    def __init__(self):
+        self.player1 = Player(1)
+        self.player2 = Player(2)
+        self.alien = Alien()
+        self.bullets = []
+
+    def add_bullet(self, player_id):
+        """Add a bullet for the specified player."""
+        if player_id == 1:
+            bullet = Bullet(self.player1, player_id)
+        else:
+            bullet = Bullet(self.player2, player_id)
+        self.bullets.append(bullet)
+        return bullet
+    
+    def get_bullets(self):
+        """Return the list of bullets."""
+        return self.bullets
+    
+    def remove_bullet(self, bullet):
+        """Remove a bullet from the list."""
+        if bullet in self.bullets:
+            self.bullets.remove(bullet)
+        
+    def update(self, )
