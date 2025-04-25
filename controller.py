@@ -5,9 +5,6 @@ class Controller:
     def __init__(self, player1, player2):
         self.player1 = player1
         self.player2 = player2
-        self.shot_delay = 300  # milliseconds
-        self.last_shot_time_p1 = 0
-        self.last_shot_time_p2 = 0
 
         def handle_input(self, events):
                 for event in events:
