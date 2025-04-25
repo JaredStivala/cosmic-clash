@@ -6,7 +6,7 @@ class Controller:
         self.player1 = player1
         self.player2 = player2
 
-        def handle_input(self, events):
+    def handle_input(self, events):
                 for event in events:
                     # Player 1 controls
                     if event.type == pygame.KEYDOWN:
@@ -15,7 +15,7 @@ class Controller:
                         elif event.key == pygame.K_s:
                             self.player1.dy = 5  # Move down
                         elif event.key == pygame.K_d:
-                            self.player1.shoot()
+                            self.player1.shoot = True
 
                     elif event.type == pygame.KEYUP:
                         if event.key in (pygame.K_w, pygame.K_s):
@@ -28,7 +28,7 @@ class Controller:
                         elif event.key == pygame.K_DOWN:
                             self.player2.dy = 5  # Move down
                         elif event.key == pygame.K_LEFT:
-                            self.player2.shoot()
+                            self.player2.shoot = True
 
                     elif event.type == pygame.KEYUP:
                         if event.key in (pygame.K_UP, pygame.K_DOWN):
