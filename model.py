@@ -2,6 +2,7 @@
 
 import pygame
 from settings import HEIGHT, WIDTH
+import controller
 
 
 class Player:
@@ -30,10 +31,15 @@ class Player:
         else:
             self.image = pygame.image.load("player2.png")
             self.x = WIDTH - 10
+        self.player_id = player_id
         self.y = HEIGHT / 2
         self.health = 3
         self.score = 0
         self.alive = True
+        self.dy = 0
+        self.shot_delay = 300  # milliseconds
+        self.last_shot_time = 0
+        self.shoot = False
 
     def move(self, dy):
         """Move the player up or down by dy pixels."""
@@ -61,6 +67,21 @@ class Player:
         if self.health <= 0:
             self.alive = False
         return self.alive
+
+    def can_shoot(self):
+        """Check if the player can shoot based on the shot delay."""
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_shot_time > self.shot_delay:
+            self.last_shot_time = current_time
+            return True
+        return False
+
+    def shoot(self):
+        """Shoot a bullet if the player can shoot."""
+        if self.can_shoot():
+            bullet = Bullet(self, self.player_id)
+            return bullet
+        return None
 
 
 class Alien:
@@ -143,8 +164,12 @@ class Bullet:
         """Move the bullet by dx pixels horizontally and dy pixels vertically."""
         self.x += dx
 
+    def get_position(self):
+        """Return the current position of the bullet."""
+        return (self.x, self.y)
 
-class GameState:
+
+class Model:
     """Class representing the game state.
     Attributes:
         player1 (Player): The first player.
@@ -171,14 +196,20 @@ class GameState:
             bullet = Bullet(self.player2, player_id)
         self.bullets.append(bullet)
         return bullet
-    
+
     def get_bullets(self):
         """Return the list of bullets."""
         return self.bullets
-    
+
     def remove_bullet(self, bullet):
         """Remove a bullet from the list."""
         if bullet in self.bullets:
             self.bullets.remove(bullet)
-        
-    def update(self, )
+
+    def update(self, dy1, dy2, shoot1, shoot2):
+        """Update the game state based on the controller input."""
+        controller1 = controller(self.player1)
+
+        # Update players' positions and check for collisions
+        self.player1.move(controller1)
+        self.player2.move(controller.player2.dy)
