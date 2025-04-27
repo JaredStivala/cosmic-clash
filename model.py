@@ -1,38 +1,16 @@
-# Cosmic Clash Model]
+# model.py
 
 import pygame
+import random
 from settings import HEIGHT, WIDTH
-import controller
 
 
 class Player:
-    """Class representing a player in the game.
-    Attributes:
-        image (pygame.Surface): The image representing the player.
-        x (int): The x-coordinate of the player.
-        y (int): The y-coordinate of the player.
-        health (int): The health of the player.
-        score (int): The score of the player.
-        alive (bool): Whether the player is alive or not.
-
-    Methods:
-        move(dy): Move the player up or down by dy pixels.
-        get_position(): Return the current position of the player.
-        get_health(): Return the current health of the player.
-        get_score(): Return the current score of the player.
-        get_alive(): Return the alive status of the player.
-        lose_life(): Reduce the player's health by one and check if they are still alive.
-    """
-
     def __init__(self, player_id):
-        if player_id == 1:
-            self.image = pygame.image.load("player1.png")
-            self.x = 10
-        else:
-            self.image = pygame.image.load("player2.png")
-            self.x = WIDTH - 10
         self.player_id = player_id
-        self.y = HEIGHT / 2
+        self.image = pygame.image.load(f"assets/player{player_id}.png").convert_alpha()
+        self.x = 50 if player_id == 1 else WIDTH - 50
+        self.y = HEIGHT // 2
         self.health = 3
         self.score = 0
         self.alive = True
@@ -41,175 +19,155 @@ class Player:
         self.last_shot_time = 0
         self.shoot = False
 
-    def move(self, dy):
-        """Move the player up or down by dy pixels."""
-        self.y += dy
-
-    def get_position(self):
-        """Return the current position of the player."""
-        return (self.x, self.y)
-
-    def get_health(self):
-        """Return the current health of the player."""
-        return self.health
-
-    def get_score(self):
-        """Return the current score of the player."""
-        return self.score
-
-    def get_alive(self):
-        """Return the alive status of the player."""
-        return self.alive
-
-    def lose_life(self):
-        """Reduce the player's health by one and check if they are still alive."""
-        self.health -= 1
-        if self.health <= 0:
-            self.alive = False
-        return self.alive
+    def move(self):
+        self.y += self.dy
+        self.y = max(80, min(self.y, HEIGHT - 30))  # Prevent moving into hearts area
 
     def can_shoot(self):
-        """Check if the player can shoot based on the shot delay."""
         current_time = pygame.time.get_ticks()
         if current_time - self.last_shot_time > self.shot_delay:
             self.last_shot_time = current_time
             return True
         return False
 
-    def shoot(self):
-        """Shoot a bullet if the player can shoot."""
+    def shoot_bullet(self):
         if self.can_shoot():
-            bullet = Bullet(self, self.player_id)
-            return bullet
+            return Bullet(self, self.player_id)
         return None
 
+    def get_health(self):
+        return self.health
 
-class Alien:
-    """Class representing an alien in the game.
-    Attributes:
-        image (pygame.Surface): The image representing the alien.
-        x (int): The x-coordinate of the alien.
-        y (int): The y-coordinate of the alien.
-        speed (int): The speed of the alien.
-        alive (bool): Whether the alien is alive or not.
-
-    Methods:
-        move(dx, dy): Move the alien by dx pixels horizontally and dy pixels vertically.
-        get_position(): Return the current position of the alien.
-        get_alive(): Return the alive status of the alien.
-    """
-
-    def __init__(
-        self,
-    ):
-        self.image = pygame.image.load("alien.png")
-        self.x = WIDTH / 2
-        self.y = HEIGHT / 2
-        self.speed = 5
-        self.health = 5
-        self.alive = True
-
-    def move(self, dx):
-        """Move the alien by dx pixels horizontally and dy pixels vertically."""
-        self.x += dx
-
-    def get_position(self):
-        """Return the current position of the alien."""
-        return (self.x, self.y)
+    def get_score(self):
+        return self.score
 
     def get_alive(self):
-        """Return the alive status of the alien."""
         return self.alive
 
     def lose_life(self):
-        """Reduce the alien's health by one and check if they are still alive."""
         self.health -= 1
         if self.health <= 0:
             self.alive = False
+
+
+class Alien:
+    def __init__(self):
+        original_image = pygame.image.load("assets/alien.png").convert_alpha()
+        width, height = original_image.get_size()
+        scaled_width = int(width * 0.75)
+        scaled_height = int(height * 0.75)
+        self.image = pygame.transform.smoothscale(
+            original_image, (scaled_width, scaled_height)
+        )
+
+        self.x = WIDTH // 2
+        self.y = random.randint(80, HEIGHT - 30)
+        self.speed_x = 2 if random.choice([True, False]) else -2
+        self.health = 3
+        self.alive = True
+
+    def move(self):
+        self.x += self.speed_x
+        if self.x <= 0 or self.x >= WIDTH:
+            self.swap_direction_x()
+
+    def swap_direction_x(self):
+        self.speed_x = -self.speed_x
+        self.x += self.speed_x
+
+    def get_alive(self):
         return self.alive
 
-    def swap_direction(self):
-        """Swap the direction of the alien."""
-        self.speed = -self.speed
-        self.x += self.speed
+    def lose_life(self):
+        self.health -= 1
+        if self.health <= 0:
+            self.alive = False
+        else:
+            self.swap_direction_x()  # Bounce horizontally on first and second hits
+
+    def check_collision_with_player(self, player1, player2):
+        if abs(self.x - player1.x) < 30:
+            player1.lose_life()
+            player2.score += 1
+            self.alive = False
+        elif abs(self.x - player2.x) < 30:
+            player2.lose_life()
+            player1.score += 1
+            self.alive = False
 
 
 class Bullet:
-    """Class representing a bullet in the game.
-    Attributes:
-        image (pygame.Surface): The image representing the bullet.
-        x (int): The x-coordinate of the bullet.
-        y (int): The y-coordinate of the bullet.
-        speed (int): The speed of the bullet.
-        alive (bool): Whether the bullet is alive or not.
-
-    Methods:
-        move(dx, dy): Move the bullet by dx pixels horizontally and dy pixels vertically.
-        get_position(): Return the current position of the bullet.
-        get_alive(): Return the alive status of the bullet.
-    """
-
     def __init__(self, player, player_id):
-        self.image = pygame.image.load("bullet.png")
-        self.x = player.x
-        self.y = player.y
-
-        if player_id == 1:
-            self.speed = 10
-        else:
-            self.speed = -10
+        self.image = pygame.image.load("assets/bullets.png").convert_alpha()
+        self.x = int(player.x)
+        self.y = int(player.y)
+        self.speed = 10 if player_id == 1 else -10
         self.alive = True
 
-    def move(self, dx):
-        """Move the bullet by dx pixels horizontally and dy pixels vertically."""
-        self.x += dx
+    def move(self):
+        self.x += self.speed
 
     def get_position(self):
-        """Return the current position of the bullet."""
         return (self.x, self.y)
+
+    def is_off_screen(self):
+        return self.x < 0 or self.x > WIDTH
 
 
 class Model:
-    """Class representing the game state.
-    Attributes:
-        player1 (Player): The first player.
-        player2 (Player): The second player.
-        alien (Alien): The alien in the game.
-        bullets (list): List of bullets in the game.
-
-    Methods:
-        add_bullet(player_id): Add a bullet for the specified player.
-        get_bullets(): Return the list of bullets.
-    """
-
     def __init__(self):
         self.player1 = Player(1)
         self.player2 = Player(2)
-        self.alien = Alien()
+        self.aliens = []
         self.bullets = []
+        self.last_alien_spawn_time = pygame.time.get_ticks()
+        self.alien_spawn_interval = 1500  # More frequent alien spawn
 
     def add_bullet(self, player_id):
-        """Add a bullet for the specified player."""
-        if player_id == 1:
-            bullet = Bullet(self.player1, player_id)
-        else:
-            bullet = Bullet(self.player2, player_id)
-        self.bullets.append(bullet)
-        return bullet
-
-    def get_bullets(self):
-        """Return the list of bullets."""
-        return self.bullets
+        bullet = (
+            self.player1.shoot_bullet()
+            if player_id == 1
+            else self.player2.shoot_bullet()
+        )
+        if bullet:
+            self.bullets.append(bullet)
 
     def remove_bullet(self, bullet):
-        """Remove a bullet from the list."""
         if bullet in self.bullets:
             self.bullets.remove(bullet)
 
-    def update(self, dy1, dy2, shoot1, shoot2):
-        """Update the game state based on the controller input."""
-        controller1 = controller(self.player1)
+    def spawn_alien(self):
+        new_alien = Alien()
+        self.aliens.append(new_alien)
 
-        # Update players' positions and check for collisions
-        self.player1.move(controller1)
-        self.player2.move(controller.player2.dy)
+    def update(self):
+        # Spawn aliens
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_alien_spawn_time > self.alien_spawn_interval:
+            self.spawn_alien()
+            self.last_alien_spawn_time = current_time
+
+        # Move players
+        self.player1.move()
+        self.player2.move()
+
+        # Move bullets and remove off-screen ones
+        for bullet in self.bullets[:]:
+            bullet.move()
+            if bullet.is_off_screen():
+                self.remove_bullet(bullet)
+
+        # Bullet–Alien collision logic
+        for bullet in self.bullets[:]:
+            for alien in self.aliens[:]:
+                if abs(bullet.x - alien.x) < 20 and abs(bullet.y - alien.y) < 20:
+                    alien.lose_life()  # Bounce (X) on 1st and 2nd hit, dies on 3rd hit
+                    self.remove_bullet(bullet)  # Bullet always disappears after hit
+                    break  # Move to next bullet
+
+        # Move aliens and check collisions with players
+        for alien in self.aliens[:]:
+            alien.move()
+            alien.check_collision_with_player(self.player1, self.player2)
+            if not alien.get_alive():
+                self.aliens.remove(alien)
