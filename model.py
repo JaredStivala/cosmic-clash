@@ -6,6 +6,33 @@ from settings import HEIGHT, WIDTH
 
 
 class Player:
+    """
+    Player class representing each player in the game.
+    Each player has an ID, position, health, score, and shooting capabilities.
+
+    Attributes:
+        player_id (int): Unique identifier for the player (1 or 2).
+        image (pygame.Surface): Image representing the player.
+        x (int): X-coordinate of the player.
+        y (int): Y-coordinate of the player.
+        health (int): Health points of the player.
+        score (int): Score of the player.
+        alive (bool): Indicates if the player is alive.
+        dy (int): Change in Y-coordinate for movement.
+        shot_delay (int): Delay between shots in milliseconds.
+        last_shot_time (int): Timestamp of the last shot.
+        shoot (bool): Indicates if the player is shooting.
+
+    Methods:
+        move(): Updates the player's position based on dy.
+        can_shoot(): Checks if the player can shoot based on shot delay.
+        shoot_bullet(): Creates a bullet if the player can shoot.
+        get_health(): Returns the player's health.
+        get_score(): Returns the player's score.
+        get_alive(): Returns if the player is alive.
+        lose_life(): Decreases the player's health by 1. If health is 0, sets alive to False.
+    """
+
     def __init__(self, player_id):
         self.player_id = player_id
         self.image = pygame.image.load(f"assets/player{player_id}.png").convert_alpha()
@@ -20,10 +47,17 @@ class Player:
         self.shoot = False
 
     def move(self):
+        """
+        Updates the player's position based on dy.
+        The player can move up or down, but not into the hearts area."""
         self.y += self.dy
-        self.y = max(80, min(self.y, HEIGHT - 30))  # Prevent moving into hearts area
+        self.y = max(100, min(self.y, HEIGHT - 30))  # Prevent moving into hearts area
 
     def can_shoot(self):
+        """
+        Checks if the player can shoot based on shot delay.
+        Returns:
+            bool: True if the player can shoot, False otherwise."""
         current_time = pygame.time.get_ticks()
         if current_time - self.last_shot_time > self.shot_delay:
             self.last_shot_time = current_time
@@ -31,20 +65,39 @@ class Player:
         return False
 
     def shoot_bullet(self):
+        """
+        Creates a bullet if the player can shoot.
+        Returns:
+            Bullet: A new Bullet object if the player can shoot, None otherwise."""
         if self.can_shoot():
             return Bullet(self, self.player_id)
         return None
 
     def get_health(self):
+        """
+        Returns:
+            int: The player's health.
+        """
         return self.health
 
     def get_score(self):
+        """
+        Returns:
+            int: The player's score.
+        """
         return self.score
 
     def get_alive(self):
+        """
+        Returns:
+            bool: True if the player is alive, False otherwise.
+        """
         return self.alive
 
     def lose_life(self):
+        """
+        Decreases the player's health by 1. If health is 0, sets alive to False.
+        """
         self.health -= 1
         if self.health <= 0:
             self.alive = False
