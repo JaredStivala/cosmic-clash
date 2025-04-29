@@ -4,6 +4,12 @@ import pygame
 import random
 from settings import HEIGHT, WIDTH
 
+pygame.mixer.init()
+alien_hit = pygame.mixer.Sound("assets/alienhit.wav")
+alien_spawn = pygame.mixer.Sound("assets/alienspawn.wav")
+bullet_shoot = pygame.mixer.Sound("assets/bulletshoot.wav")
+life_loss = pygame.mixer.Sound("assets/lifeloss.wav")
+
 
 class Player:
     """
@@ -120,6 +126,7 @@ class Alien:
         self.health = 3
         self.alive = True
         self.update_opacity()  # set initial opacity
+        alien_spawn.play()
 
     def update_opacity(self):
         # Scale alpha by health: 3 -> 255, 2 -> ~170, 1 -> ~85
@@ -143,9 +150,11 @@ class Alien:
         self.health -= 1
         if self.health <= 0:
             self.alive = False
+            alien_hit.play()
         else:
             self.swap_direction_x()  # bounce
             self.update_opacity()  # reduce opacity
+            life_loss.play()
 
     def check_collision_with_player(self, player1, player2):
         if abs(self.x - player1.x) < 30:
