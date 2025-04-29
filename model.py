@@ -42,7 +42,7 @@ class Player:
         self.score = 0
         self.alive = True
         self.dy = 0
-        self.shot_delay = 300  # milliseconds
+        self.shot_delay = 200  # milliseconds
         self.last_shot_time = 0
         self.shoot = False
 
@@ -109,15 +109,23 @@ class Alien:
         width, height = original_image.get_size()
         scaled_width = int(width * 0.75)
         scaled_height = int(height * 0.75)
-        self.image = pygame.transform.smoothscale(
+        self.original_image = pygame.transform.smoothscale(
             original_image, (scaled_width, scaled_height)
         )
 
+        self.image = self.original_image.copy()
         self.x = WIDTH // 2
         self.y = random.randint(80, HEIGHT - 30)
         self.speed_x = 2 if random.choice([True, False]) else -2
         self.health = 3
         self.alive = True
+        self.update_opacity()  # set initial opacity
+
+    def update_opacity(self):
+        # Scale alpha by health: 3 -> 255, 2 -> ~170, 1 -> ~85
+        alpha = int((self.health / 3) * 255)
+        self.image = self.original_image.copy()
+        self.image.set_alpha(alpha)
 
     def move(self):
         self.x += self.speed_x
@@ -136,7 +144,8 @@ class Alien:
         if self.health <= 0:
             self.alive = False
         else:
-            self.swap_direction_x()  # Bounce horizontally on first and second hits
+            self.swap_direction_x()  # bounce
+            self.update_opacity()  # reduce opacity
 
     def check_collision_with_player(self, player1, player2):
         if abs(self.x - player1.x) < 30:

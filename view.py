@@ -37,7 +37,7 @@ def draw_bullet(bullet):
 
 
 def draw_alien(alien):
-    scaled_alien = pygame.transform.scale(alien_img, (60, 60))
+    scaled_alien = pygame.transform.scale(alien.image, (60, 60))
     rect = scaled_alien.get_rect(center=(int(alien.x), int(alien.y)))
     screen.blit(scaled_alien, rect)
 
