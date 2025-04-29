@@ -14,7 +14,7 @@ class Controller:
                  `dy` (vertical movement speed) and `shoot` (boolean indicating shooting action).
     """
 
-        """
+    """
         Initializes the Controller with two players.
 
         Args:
@@ -22,7 +22,7 @@ class Controller:
             player2: The second player object.
         """
 
-        """
+    """
         Processes a list of input events and updates player actions accordingly.
 
         Args:
@@ -41,7 +41,7 @@ class Controller:
                 - LEFT arrow key: Shoot.
                 - Release UP or DOWN: Stop vertical movement.
         """
-        
+
     def __init__(self, player1, player2):
         self.player1 = player1
         self.player2 = player2
