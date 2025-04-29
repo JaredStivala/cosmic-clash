@@ -61,8 +61,8 @@ def initial_rules_screen():
 
     controls_text = [
         "CONTROLS:",
-        "Player 1 | Move: W / S    , Shoot: D",
-        "Player 2 | Move: UP / DOWN    , Shoot: LEFT",
+        "Player 1 (LEFT)   | Move: W / S    , Shoot: D",
+        "Player 2 (RIGHT)  | Move: UP / DOWN    , Shoot: LEFT",
     ]
     continue_text = "Press ENTER to continue."
 
