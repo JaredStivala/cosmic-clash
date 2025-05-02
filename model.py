@@ -4,9 +4,19 @@ import pygame
 import random
 from settings import HEIGHT, WIDTH
 
-pygame.mixer.init()
-alien_hit = pygame.mixer.Sound("assets/alienhit.wav")
-life_loss = pygame.mixer.Sound("assets/lifeloss.wav")
+sound_enabled = True
+try:
+    pygame.mixer.init()
+except pygame.error:
+    print("Audio initialization failed. Sounds will be disabled.")
+    sound_enabled = False
+
+if sound_enabled:
+    alien_hit = pygame.mixer.Sound("assets/alienhit.wav")
+    life_loss = pygame.mixer.Sound("assets/lifeloss.wav")
+else:
+    alien_hit = None  # or a mock object if needed
+    life_loss = None  # or a mock object if needed
 
 
 class Player:
@@ -147,23 +157,28 @@ class Alien:
         self.health -= 1
         if self.health <= 0:
             self.alive = False
-            alien_hit.play()
+            if sound_enabled:
+                alien_hit.play()
         else:
             self.swap_direction_x()  # bounce
             self.update_opacity()  # reduce opacity
-            alien_hit.play()
+            if sound_enabled:
+                alien_hit.play()
 
     def check_collision_with_player(self, player1, player2):
         if abs(self.x - player1.x) < 30:
             player1.lose_life()
             player2.score += 1
             self.alive = False
-            life_loss.play()
+            if sound_enabled:
+                life_loss.play()
+
         elif abs(self.x - player2.x) < 30:
             player2.lose_life()
             player1.score += 1
             self.alive = False
-            life_loss.play()
+            if sound_enabled:
+                life_loss.play()
 
 
 class Bullet:
@@ -185,6 +200,17 @@ class Bullet:
 
 
 class Model:
+    """
+    Model class representing the game state, including players, aliens, and bullets.
+    Attributes:
+        player1 (Player): The first player.
+        player2 (Player): The second player.
+        aliens (list): List of aliens in the game.
+        bullets (list): List of bullets in the game.
+        last_alien_spawn_time (int): Timestamp of the last alien spawn.
+        alien_spawn_interval (int): Time interval for spawning aliens.
+    """
+
     def __init__(self):
         self.player1 = Player(1)
         self.player2 = Player(2)
@@ -194,6 +220,11 @@ class Model:
         self.alien_spawn_interval = 1500  # More frequent alien spawn
 
     def add_bullet(self, player_id):
+        """
+        Adds a bullet to the game if the player can shoot.
+        Args:
+            player_id (int): The ID of the player (1 or 2) who is shooting.
+        """
         bullet = (
             self.player1.shoot_bullet()
             if player_id == 1
@@ -203,14 +234,29 @@ class Model:
             self.bullets.append(bullet)
 
     def remove_bullet(self, bullet):
+        """
+        Removes a bullet from the game if it goes off-screen.
+        Args:
+            bullet (Bullet): The bullet to be removed.
+        """
+        # Remove the bullet from the list if it goes off-screen
         if bullet in self.bullets:
             self.bullets.remove(bullet)
 
     def spawn_alien(self):
+        """
+        Spawns a new alien at a random Y position within the screen height.
+        The alien moves horizontally across the screen.
+        """
         new_alien = Alien()
         self.aliens.append(new_alien)
 
     def update(self):
+        """
+        Update the game state, including player movement, bullet movement,
+        alien movement, and collision detection.
+        """
+
         # Spawn aliens
         current_time = pygame.time.get_ticks()
         if current_time - self.last_alien_spawn_time > self.alien_spawn_interval:
@@ -230,7 +276,7 @@ class Model:
         # Bullet–Alien collision logic
         for bullet in self.bullets[:]:
             for alien in self.aliens[:]:
-                if abs(bullet.x - alien.x) < 20 and abs(bullet.y - alien.y) < 20:
+                if abs(bullet.x - alien.x) < 30 and abs(bullet.y - alien.y) < 30:
                     alien.lose_life()  # Bounce (X) on 1st and 2nd hit, dies on 3rd hit
                     self.remove_bullet(bullet)  # Bullet always disappears after hit
                     break  # Move to next bullet

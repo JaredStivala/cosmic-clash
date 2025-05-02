@@ -10,8 +10,17 @@ clock = pygame.time.Clock()
 font_large = pygame.font.SysFont(None, 72)
 font_medium = pygame.font.SysFont(None, 48)
 
-pygame.mixer.init()
-bullet_shoot = pygame.mixer.Sound("assets/bulletshoot.wav")
+sound_enabled = True
+try:
+    pygame.mixer.init()
+except pygame.error:
+    print("Audio initialization failed. Sounds will be disabled.")
+    sound_enabled = False
+
+if sound_enabled:
+    bullet_shoot = pygame.mixer.Sound("assets/bulletshoot.wav")
+else:
+    bullet_shoot = None
 
 
 def wrap_text(text, font, max_width):
@@ -251,11 +260,13 @@ def main():
 
             if model.player1.shoot:
                 model.add_bullet(player_id=1)
-                bullet_shoot.play()
+                if sound_enabled:
+                    bullet_shoot.play()
                 model.player1.shoot = False
             if model.player2.shoot:
                 model.add_bullet(player_id=2)
-                bullet_shoot.play()
+                if sound_enabled:
+                    bullet_shoot.play()
                 model.player2.shoot = False
 
             model.update()
