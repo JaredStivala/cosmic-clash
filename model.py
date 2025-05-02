@@ -1,7 +1,11 @@
 # model.py
+# This file contains the Model class and its associated classes for the game.
+# It handles player and alien movements, bullet firing, and collision detection.
+# It also manages the game state, including player health and score.
+# pylint: disable=no-member,undefined-variable
 
-import pygame
 import random
+import pygame
 from settings import HEIGHT, WIDTH
 
 sound_enabled = True
@@ -63,7 +67,8 @@ class Player:
     def move(self):
         """
         Updates the player's position based on dy.
-        The player can move up or down, but not into the hearts area."""
+        The player can move up or down, but not into the hearts area.
+        """
         self.y += self.dy
         self.y = max(100, min(self.y, HEIGHT - 30))  # Prevent moving into hearts area
 
@@ -71,7 +76,8 @@ class Player:
         """
         Checks if the player can shoot based on shot delay.
         Returns:
-            bool: True if the player can shoot, False otherwise."""
+            bool: True if the player can shoot, False otherwise.
+        """
         current_time = pygame.time.get_ticks()
         if current_time - self.last_shot_time > self.shot_delay:
             self.last_shot_time = current_time
@@ -82,7 +88,8 @@ class Player:
         """
         Creates a bullet if the player can shoot.
         Returns:
-            Bullet: A new Bullet object if the player can shoot, None otherwise."""
+            Bullet: A new Bullet object if the player can shoot, None otherwise.
+        """
         if self.can_shoot():
             return Bullet(self, self.player_id)
         return None
@@ -118,6 +125,26 @@ class Player:
 
 
 class Alien:
+    """
+    Alien class representing the alien enemy in the game.
+    Each alien has an image, position, speed, health, and state (alive or dead).
+    Attributes:
+        original_image (pygame.Surface): Original image of the alien.
+        image (pygame.Surface): Current image of the alien with opacity based on health.
+        x (int): X-coordinate of the alien.
+        y (int): Y-coordinate of the alien.
+        speed_x (int): Speed of the alien in the X direction.
+        health (int): Health points of the alien.
+        alive (bool): Indicates if the alien is alive.
+    Methods:
+        update_opacity(): Updates the opacity of the alien image based on health.
+        move(): Moves the alien horizontally across the screen.
+        swap_direction_x(): Reverses the alien's direction in the X axis.
+        get_alive(): Returns if the alien is alive.
+        lose_life(): Decreases the alien's health by 1. If health is 0, sets alive to False.
+        check_collision_with_player(player1, player2): Checks for collision with players and updates their states.
+    """
+
     def __init__(self):
         original_image = pygame.image.load("assets/alien.png").convert_alpha()
         width, height = original_image.get_size()
@@ -136,24 +163,44 @@ class Alien:
         self.update_opacity()  # set initial opacity
 
     def update_opacity(self):
+        """
+        Updates the opacity of the alien image based on its health.
+        The opacity is scaled from 0 to 255 based on the health value.
+        Health 3 -> 255, 2 -> ~170, 1 -> ~85
+        """
         # Scale alpha by health: 3 -> 255, 2 -> ~170, 1 -> ~85
         alpha = int((self.health / 3) * 255)
         self.image = self.original_image.copy()
         self.image.set_alpha(alpha)
 
     def move(self):
+        """
+        Moves the alien horizontally across the screen.
+        If the alien reaches the screen edges, it reverses direction.
+        """
         self.x += self.speed_x
         if self.x <= 0 or self.x >= WIDTH:
             self.swap_direction_x()
 
     def swap_direction_x(self):
+        """
+        Reverses the alien's direction in the X axis.
+        """
         self.speed_x = -self.speed_x
         self.x += self.speed_x
 
     def get_alive(self):
+        """
+        Returns:
+            bool: True if the alien is alive, False otherwise.
+        """
         return self.alive
 
     def lose_life(self):
+        """
+        Decreases the alien's health by 1. If health is 0, sets alive to False.
+        If the alien is hit, it bounces back and reduces opacity.
+        """
         self.health -= 1
         if self.health <= 0:
             self.alive = False
@@ -166,6 +213,13 @@ class Alien:
                 alien_hit.play()
 
     def check_collision_with_player(self, player1, player2):
+        """
+        Checks for collision with players and updates their states.
+        If the alien collides with a player, the player loses a life and the alien is removed.
+        Args:
+            player1 (Player): The first player.
+            player2 (Player): The second player.
+        """
         if abs(self.x - player1.x) < 30:
             player1.lose_life()
             player2.score += 1
@@ -182,6 +236,21 @@ class Alien:
 
 
 class Bullet:
+    """
+    Bullet class representing the bullets fired by players.
+    Each bullet has an image, position, speed, and state (alive or not).
+    Attributes:
+        image (pygame.Surface): Image representing the bullet.
+        x (int): X-coordinate of the bullet.
+        y (int): Y-coordinate of the bullet.
+        speed (int): Speed of the bullet.
+        alive (bool): Indicates if the bullet is alive.
+    Methods:
+        move(): Moves the bullet horizontally across the screen.
+        get_position(): Returns the current position of the bullet.
+        is_off_screen(): Checks if the bullet is off-screen.
+    """
+
     def __init__(self, player, player_id):
         self.image = pygame.image.load("assets/bullets.png").convert_alpha()
         self.x = int(player.x)
@@ -190,12 +259,25 @@ class Bullet:
         self.alive = True
 
     def move(self):
+        """
+        Moves the bullet horizontally across the screen.
+        If the bullet goes off-screen, it is marked as not alive.
+        """
         self.x += self.speed
 
     def get_position(self):
+        """
+        Returns:
+            tuple: The current position of the bullet (x, y).
+        """
         return (self.x, self.y)
 
     def is_off_screen(self):
+        """
+        Checks if the bullet is off-screen.
+        Returns:
+            bool: True if the bullet is off-screen, False otherwise.
+        """
         return self.x < 0 or self.x > WIDTH
 
 

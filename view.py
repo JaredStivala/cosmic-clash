@@ -1,4 +1,5 @@
 # view.py
+# pylint: disable=no-member,undefined-variable
 
 import pygame
 from settings import WIDTH, HEIGHT

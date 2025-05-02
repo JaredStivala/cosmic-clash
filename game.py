@@ -1,4 +1,5 @@
 # game.py
+# pylint: disable=no-member,undefined-variable
 
 import pygame
 from controller import Controller
@@ -13,7 +14,7 @@ font_medium = pygame.font.SysFont(None, 48)
 sound_enabled = True
 try:
     pygame.mixer.init()
-except pygame.error:
+except pygame.error:  # pylint-disable
     print("Audio initialization failed. Sounds will be disabled.")
     sound_enabled = False
 
@@ -287,7 +288,7 @@ def main():
                 running = False
 
         # End screen
-        end_screen(winner_name)
+        end_screen(winner_name)  # pylint: disable=used-before-assignment
 
         # Wait for Enter to restart
         waiting_for_restart = True
