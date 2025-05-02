@@ -48,6 +48,7 @@ def initial_rules_screen():
     running = True
 
     # Fonts
+    # pylint: disable=redefined-outer-name
     font_large = pygame.font.SysFont(None, int(view.SCREEN_HEIGHT * 0.08))
     font_medium = pygame.font.SysFont(None, int(view.SCREEN_HEIGHT * 0.045))
 
