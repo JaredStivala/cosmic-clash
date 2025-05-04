@@ -11,8 +11,8 @@ Classes:
     Model: Represents the game state and contains update logic.
 """
 
-import pygame
 import random
+import pygame
 from settings import HEIGHT, WIDTH
 
 
@@ -36,10 +36,19 @@ class Player:
         self.shoot = False
 
     def move(self):
+        """
+        Move the player vertically based on the current dy value.
+        The player cannot move into the hearts area at the bottom of the screen.
+        """
         self.y += self.dy
         self.y = max(80, min(self.y, HEIGHT - 30))  # Prevent moving into hearts area
 
     def can_shoot(self):
+        """
+        Check if the player can shoot based on the shot delay.
+        Returns:
+            bool: True if the player can shoot, False otherwise.
+        """
         current_time = pygame.time.get_ticks()
         if current_time - self.last_shot_time > self.shot_delay:
             self.last_shot_time = current_time
@@ -47,20 +56,43 @@ class Player:
         return False
 
     def shoot_bullet(self):
+        """
+        Create a new bullet if the player can shoot.
+        Returns:
+            Bullet: A new Bullet instance if the player can shoot, None otherwise.
+        """
         if self.can_shoot():
             return Bullet(self, self.player_id)
         return None
 
     def get_health(self):
+        """
+        Get the current health of the player.
+        Returns:
+            int: The current health of the player.
+        """
         return self.health
 
     def get_score(self):
+        """
+        Get the current score of the player.
+        Returns:
+            int: The current score of the player.
+        """
         return self.score
 
     def get_alive(self):
+        """
+        Check if the player is alive.
+        Returns:
+            bool: True if the player is alive, False otherwise.
+        """
         return self.alive
 
     def lose_life(self):
+        """
+        Decrease the player's health by 1. If health reaches 0, set alive to False.
+        """
         self.health -= 1
         if self.health <= 0:
             self.alive = False
@@ -96,18 +128,34 @@ class Alien:
         self.alive = True
 
     def move(self):
+        """
+        Move the alien horizontally based on its speed.
+        If it hits the screen edges, it bounces back.
+        """
         self.x += self.speed_x
         if self.x <= 0 or self.x >= WIDTH:
             self.swap_direction_x()
 
     def swap_direction_x(self):
+        """
+        Reverse the horizontal direction of the alien.
+        """
         self.speed_x = -self.speed_x
         self.x += self.speed_x
 
     def get_alive(self):
+        """
+        Check if the alien is alive.
+        Returns:
+            bool: True if the alien is alive, False otherwise.
+        """
         return self.alive
 
     def lose_life(self):
+        """
+        Decrease the alien's health by 1. If health reaches 0, set alive to False.
+        On the first and second hits, it bounces horizontally.
+        """
         self.health -= 1
         if self.health <= 0:
             self.alive = False
@@ -115,6 +163,17 @@ class Alien:
             self.swap_direction_x()  # Bounce horizontally on first and second hits
 
     def check_collision_with_player(self, player1, player2):
+        """
+        Check for collision with players. If a player is hit, they lose a life.
+        If the alien is hit, it loses a life.
+        Args:
+            player1 (Player): First player instance.
+            player2 (Player): Second player instance.
+        1. If the alien collides with player1, player1 loses a life and player2 scores.
+        2. If the alien collides with player2, player2 loses a life and player1 scores.
+        3. If the alien is hit by a bullet, it loses a life and the bullet is removed.
+        4. If the alien's health reaches 0, it is marked as not alive.
+        """
         if abs(self.x - player1.x) < 30:
             player1.lose_life()
             player2.score += 1
@@ -144,12 +203,25 @@ class Bullet:
         self.alive = True
 
     def move(self):
+        """
+        Move the bullet horizontally based on its speed.
+        """
         self.x += self.speed
 
     def get_position(self):
+        """
+        Get the current position of the bullet.
+        Returns:
+            tuple: (x, y) coordinates of the bullet.
+        """
         return (self.x, self.y)
 
     def is_off_screen(self):
+        """
+        Check if the bullet is off the screen.
+        Returns:
+            bool: True if the bullet is off the screen, False otherwise.
+        """
         return self.x < 0 or self.x > WIDTH
 
 
@@ -175,6 +247,10 @@ class Model:
         self.alien_spawn_interval = 1500  # More frequent alien spawn
 
     def add_bullet(self, player_id):
+        """
+        Add a bullet to the game based on the player ID.
+        Args:
+            player_id (int): ID of the player who is shooting."""
         bullet = (
             self.player1.shoot_bullet()
             if player_id == 1
@@ -184,14 +260,27 @@ class Model:
             self.bullets.append(bullet)
 
     def remove_bullet(self, bullet):
+        """
+        Remove a bullet from the game.
+        Args:
+            bullet (Bullet): The bullet instance to remove.
+        """
         if bullet in self.bullets:
             self.bullets.remove(bullet)
 
     def spawn_alien(self):
+        """
+        Spawn a new alien at a random vertical position.
+        The alien's horizontal speed is randomly set to either 2 or -2.
+        """
         new_alien = Alien()
         self.aliens.append(new_alien)
 
     def update(self):
+        """
+        Update the game state, including player movement, bullet movement,
+        alien spawning, and collision detection.
+        """
         # Spawn aliens
         current_time = pygame.time.get_ticks()
         if current_time - self.last_alien_spawn_time > self.alien_spawn_interval:

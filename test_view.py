@@ -10,6 +10,8 @@ from model import Model
 import view
 from settings import WIDTH, HEIGHT
 
+# pylint: disable=no-member,undefined-variable
+
 
 class TestViewFunctions(unittest.TestCase):
     """

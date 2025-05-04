@@ -5,6 +5,8 @@ Unit tests for the Controller class in controller.py.
 Tests check whether input events correctly update player states.
 """
 
+# pylint: disable=no-member,undefined-variable
+
 import unittest
 import pygame
 import pygame.locals as pl
