@@ -1,4 +1,19 @@
-# game.py
+"""
+game.py
+
+Main entry point for the Cosmic Clash game. Handles game setup, screens, input,
+audio initialization, and the main game loop. Uses Model, Controller, and view
+modules to render and control the game state.
+
+Functions:
+    wrap_text(text, font, max_width): Wraps long text into multiple lines.
+    initial_rules_screen(): Displays the game rules.
+    name_input_screen(): Allows users to enter their player names.
+    countdown_screen(): Displays a countdown before the game starts.
+    end_screen(winner_name): Displays the winning message and replay prompt.
+    main(): Runs the entire game loop and handles transitions.
+"""
+
 # pylint: disable=no-member,undefined-variable
 
 import pygame
@@ -26,8 +41,15 @@ else:
 
 def wrap_text(text, font, max_width):
     """
-    Splits text into lines so that each line does not exceed max_width.
-    Returns a list of lines.
+    Splits the given text into multiple lines so that each line fits within the specified max width.
+
+    Args:
+        text (str): The text to wrap.
+        font (pygame.font.Font): The font used to measure text width.
+        max_width (int): Maximum pixel width for each line.
+
+    Returns:
+        list: A list of string lines wrapped to fit the screen.
     """
     words = text.split(" ")
     lines = []
@@ -45,14 +67,15 @@ def wrap_text(text, font, max_width):
 
 
 def initial_rules_screen():
+    """
+    Displays the initial rules screen explaining game mechanics and controls.
+    Waits for the player to press ENTER to proceed.
+    """
     running = True
 
-    # Fonts
-    # pylint: disable=redefined-outer-name
     font_large = pygame.font.SysFont(None, int(view.SCREEN_HEIGHT * 0.08))
     font_medium = pygame.font.SysFont(None, int(view.SCREEN_HEIGHT * 0.045))
 
-    # Content
     objective_text = [
         "OBJECTIVE:",
         "- Don't let the aliens pass you.",
@@ -94,7 +117,6 @@ def initial_rules_screen():
         column_width = (view.SCREEN_WIDTH - 2 * side_margin - column_spacing) // 2
         line_spacing = int(view.SCREEN_HEIGHT * 0.045)
 
-        # LEFT COLUMN — OBJECTIVE (with wrapping)
         y_offset_left = top_margin
         x_left = side_margin
         for line in objective_text:
@@ -105,7 +127,6 @@ def initial_rules_screen():
                 view.screen.blit(rendered_line, (x_left, y_offset_left))
                 y_offset_left += line_spacing
 
-        # RIGHT COLUMN — HOW TO SCORE (with wrapping)
         y_offset_right = top_margin
         x_right = side_margin + column_width + column_spacing
         for line in how_to_score_text:
@@ -116,7 +137,6 @@ def initial_rules_screen():
                 view.screen.blit(rendered_line, (x_right, y_offset_right))
                 y_offset_right += line_spacing
 
-        # BOTTOM — CONTROLS (aligned)
         y_offset_bottom = view.SCREEN_HEIGHT - int(view.SCREEN_HEIGHT * 0.25)
         for line in controls_text:
             rendered_line = font_medium.render(
@@ -131,7 +151,6 @@ def initial_rules_screen():
             )
             y_offset_bottom += line_spacing
 
-        # Extra space before "Press ENTER"
         y_offset_bottom += int(line_spacing * 0.8)
         continue_rendered = font_medium.render(continue_text, True, (255, 255, 255))
         view.screen.blit(
@@ -154,6 +173,12 @@ def initial_rules_screen():
 
 
 def name_input_screen():
+    """
+    Prompts each player to enter their name. Handles keyboard input including backspace and Enter.
+
+    Returns:
+        tuple: Names of player 1 and player 2 as strings.
+    """
     player_names = ["", ""]
     current_player = 0
     input_active = True
@@ -192,7 +217,6 @@ def name_input_screen():
                         current_player += 1
                         if current_player > 1:
                             input_active = False
-                    # Otherwise, wait for the name
                 elif event.key == pygame.K_BACKSPACE:
                     player_names[current_player] = player_names[current_player][:-1]
                 else:
@@ -203,6 +227,9 @@ def name_input_screen():
 
 
 def countdown_screen():
+    """
+    Displays a countdown from 3 to 1 before the match starts, with 1-second intervals.
+    """
     for count in range(3, 0, -1):
         view.screen.fill((0, 0, 0))
         text = font_large.render(str(count), True, (255, 255, 255))
@@ -211,10 +238,16 @@ def countdown_screen():
         )
         view.screen.blit(text, text_rect)
         pygame.display.flip()
-        pygame.time.delay(1000)  # 1 second between numbers
+        pygame.time.delay(1000)
 
 
 def end_screen(winner_name):
+    """
+    Displays the end screen with the winner's name and prompts to restart the game.
+
+    Args:
+        winner_name (str): Name of the player who won.
+    """
     view.screen.fill((0, 0, 0))
     end_text = font_large.render(
         f"End of the Game! {winner_name} won!", True, (255, 0, 0)
@@ -234,13 +267,15 @@ def end_screen(winner_name):
 
 
 def main():
-    while True:  # Game restart loop
-        # Show initial screens
+    """
+    Main game loop. Manages the flow from welcome screen to gameplay to ending.
+    Handles player movement, bullet firing, alien spawning, collisions, score tracking, and game reset.
+    """
+    while True:
         initial_rules_screen()
         player1_name, player2_name = name_input_screen()
         countdown_screen()
 
-        # Game setup
         model = Model()
         controller = Controller(model.player1, model.player2)
         running = True
@@ -253,10 +288,8 @@ def main():
                     pygame.quit()
                     return
 
-            # Handle input
             controller.handle_input(events)
 
-            # Update game state
             model.player1.move()
             model.player2.move()
 
@@ -273,7 +306,6 @@ def main():
 
             model.update()
 
-            # Check for game over (score of 3)
             if model.player1.score >= 3:
                 winner_name = player1_name
                 game_over = True
@@ -281,17 +313,14 @@ def main():
                 winner_name = player2_name
                 game_over = True
 
-            # Render game with player names
             view.render(model, player1_name, player2_name)
             clock.tick(60)
 
             if game_over:
                 running = False
 
-        # End screen
-        end_screen(winner_name)  # pylint: disable=used-before-assignment
+        end_screen(winner_name)
 
-        # Wait for Enter to restart
         waiting_for_restart = True
         while waiting_for_restart:
             for event in pygame.event.get():
@@ -300,7 +329,7 @@ def main():
                     return
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        waiting_for_restart = False  # Restart the game
+                        waiting_for_restart = False
 
 
 if __name__ == "__main__":

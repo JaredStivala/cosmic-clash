@@ -1,5 +1,14 @@
-# Tests for the model.py file
+"""
+test_model.py
+
+This test suite verifies the functionality of the core game logic defined in model.py.
+It includes unit tests for the Player, Alien, Bullet, and Model classes using Python's unittest framework.
+
+Each test class isolates the logic and mocks Pygame dependencies to allow for headless testing.
+"""
+
 # pylint: disable=no-member,undefined-variable
+
 import unittest
 from unittest.mock import patch
 import pygame
@@ -41,7 +50,7 @@ class TestPlayer(unittest.TestCase):
         self.player.move()
         self.assertGreaterEqual(self.player.y, 100)
 
-        self.player.y = HEIGHT + 100  # way off screen
+        self.player.y = HEIGHT + 100
         self.player.dy = 10
         self.player.move()
         self.assertLessEqual(self.player.y, HEIGHT - 30)
@@ -51,8 +60,8 @@ class TestPlayer(unittest.TestCase):
         """
         Test that the Player respects the shooting delay.
         """
-        self.assertFalse(self.player.can_shoot())  # at t=0
-        self.assertTrue(self.player.can_shoot())  # at t=250, enough delay
+        self.assertFalse(self.player.can_shoot())
+        self.assertTrue(self.player.can_shoot())
 
     def test_lose_life_and_death(self):
         """
@@ -104,7 +113,7 @@ class TestAlien(unittest.TestCase):
         self.alien.x = WIDTH - 1 if self.alien.speed_x > 0 else 1
         original_direction = self.alien.speed_x
 
-        self.alien.move()  # should trigger bounce
+        self.alien.move()
         self.assertNotEqual(self.alien.speed_x, original_direction)
 
 
