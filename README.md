@@ -16,6 +16,7 @@ Download the folder from [GitHub]
     ├── README.md
     └── requirements.txt
     ```
+  - you might have to CD into the folder first
  - run requirements.txt
  - run game.py to start the game
  - ENJOY!
