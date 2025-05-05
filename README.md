@@ -1,6 +1,24 @@
 # Cosmic Clash
 
-Run `game.py` to start the game.
+Download the folder from [GitHub]
+ - code: download ZIP
+ - extract the ZIP file
+ - open the folder in vs code: 
+  - ensure you are in the correct directory, it should look like this:
+    ```
+    Cosmic-Clash
+    ├── alien.py
+    ├── alien_bullet.py
+    ├── alien_group.py
+    ├── bullet.py
+    ├── game.py
+    ├── player.py
+    ├── README.md
+    └── requirements.txt
+    ```
+ - run requirements.txt
+ - run game.py to start the game
+ - ENJOY!
 
 ## OBJECTIVE
 - Don't let the aliens pass you.
